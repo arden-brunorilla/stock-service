@@ -1,4 +1,4 @@
-package com.branacar.stockservice;
+package com.branacar.stock;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
