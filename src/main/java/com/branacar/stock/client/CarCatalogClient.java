@@ -13,7 +13,7 @@ public interface CarCatalogClient {
     @GetMapping("/cars/by-stock/{stockId}")
     List<CarSummaryDto> findByStock(@PathVariable UUID stockId);
 
-    @PatchMapping("/cars/{id}/location/{stockId}")
+    @PutMapping("/cars/{id}/location/{stockId}")
     void updateLocation(@PathVariable UUID id,
                         @PathVariable UUID stockId);
 }
