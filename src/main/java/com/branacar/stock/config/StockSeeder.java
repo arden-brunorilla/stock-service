@@ -31,8 +31,8 @@ public class StockSeeder {
             // Central
             StockCentral central = (StockCentral) stockRepo.save(
                     StockCentral.builder()
-                            .stockId(UUID.randomUUID())
-                            .address("Av. Panamerican 874")
+                            .stockId(UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-ffffffffffff"))
+                            .address("Av. Panamericana 874")
                             .build());
 
             // Concesionaria

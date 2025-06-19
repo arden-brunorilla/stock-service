@@ -6,9 +6,7 @@ import com.branacar.stock.model.StockType;
 
 import java.util.UUID;
 
-/**
- * DTO simple para exponer datos básicos de un depósito.
- */
+
 public record StockDto(
         UUID stockId,
         StockType type,

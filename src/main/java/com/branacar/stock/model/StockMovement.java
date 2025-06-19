@@ -18,7 +18,6 @@ public class StockMovement {
     @Enumerated(EnumType.STRING)
     private MovementReason reason;
 
-    /** Relación lógica — el auto vive en car-service */
     private UUID carId;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -27,12 +27,10 @@ public class StockService {
         return stockRepo.findAll().stream().map(StockDto::from).toList();
     }
 
-    /* ----------- Inventario ----------------- */
     public List<CarSummaryDto> inventory(UUID stockId) {
         return carClient.findByStock(stockId);
     }
 
-    /* ----------- Movimiento ----------------- */
     @Transactional
     public StockMovementDto move(NewMovementRequest req) {
 
@@ -41,8 +39,7 @@ public class StockService {
         Stock dest = stockRepo.findById(req.destinationId())
                 .orElseThrow(() -> new IllegalArgumentException("Destination not found"));
 
-        // Aquí podrías validar que el auto está realmente en origin
-        // omitir por simplicidad MVP
+
 
         StockMovement mov = movRepo.save(
                 StockMovement.builder()
