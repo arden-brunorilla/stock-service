@@ -22,6 +22,24 @@ public class StockController {
         return svc.listStocks();
     }
 
+    /* GET /stocks/central */
+    @GetMapping("/central")
+    public StockDto getCentralStock() {
+        return svc.getCentralStock();
+    }
+
+    /* GET /stocks/local */
+    @GetMapping("/local")
+    public List<StockDto> getLocalStocks() {
+        return svc.getLocalStocks();
+    }
+
+    /* GET /stocks/statistics */
+    @GetMapping("/statistics")
+    public StockStatisticsDto getStatistics() {
+        return svc.getStockStatistics();
+    }
+
     /* GET /stocks/{id}/inventory */
     @GetMapping("/{id}/inventory")
     public List<CarSummaryDto> inventory(@PathVariable UUID id) {
