@@ -1,6 +1,7 @@
 package com.branacar.stock.controller;
 
 import com.branacar.stock.controller.dto.*;
+import com.branacar.stock.service.IStockService;
 import com.branacar.stock.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StockController {
 
-    private final StockService svc;
+    private final IStockService svc;
 
     /* GET /stocks */
     @GetMapping
@@ -50,5 +51,20 @@ public class StockController {
     @PostMapping("/movements")
     public ResponseEntity<StockMovementDto> move(@RequestBody NewMovementRequest body) {
         return ResponseEntity.ok( svc.move(body) );
+    }
+
+    /* POST /stocks/reserve */
+    @PostMapping("/reserve")
+    public ResponseEntity<StockMovementDto> reserveCar(
+            @RequestParam UUID carId,
+            @RequestParam UUID centralStockId,
+            @RequestParam UUID localStockId) {
+        return ResponseEntity.ok(svc.reserveCarForSale(carId, centralStockId, localStockId));
+    }
+
+    /* GET /stocks/car/{carId}/location */
+    @GetMapping("/car/{carId}/location")
+    public ResponseEntity<StockDto> getCarLocation(@PathVariable UUID carId) {
+        return ResponseEntity.ok(svc.getStockByCarId(carId));
     }
 }

@@ -12,4 +12,6 @@ public interface IStockService {
     StockStatisticsDto getStockStatistics();
     List<CarSummaryDto> inventory(UUID stockId);
     StockMovementDto move(NewMovementRequest req);
+    StockMovementDto reserveCarForSale(UUID carId, UUID centralStockId, UUID localStockId);
+    StockDto getStockByCarId(UUID carId);
 }

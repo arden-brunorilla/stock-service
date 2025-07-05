@@ -8,6 +8,7 @@ import com.branacar.stock.controller.dto.StockMovementDto;
 import com.branacar.stock.model.*;
 import com.branacar.stock.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StockService implements IStockService{
 
     private final StockRepository stockRepo;
@@ -132,4 +134,70 @@ public class StockService implements IStockService{
         return new StockStatisticsDto(centralStockCount, localStockCount);
     }
 
+    public StockDto getStockByCarId(UUID carId) {
+        // Buscar en qué stock está el auto actualmente
+        List<CarSummaryDto> carsInCentral = carClient.findByStock(getCentralStock().stockId());
+        boolean isInCentral = carsInCentral.stream()
+                .anyMatch(car -> car.carId().equals(carId));
+        
+        if (isInCentral) {
+            return getCentralStock();
+        } else {
+            // Buscar en stocks locales
+            List<StockDto> localStocks = getLocalStocks();
+            for (StockDto localStock : localStocks) {
+                List<CarSummaryDto> carsInLocal = carClient.findByStock(localStock.stockId());
+                boolean isInLocal = carsInLocal.stream()
+                        .anyMatch(car -> car.carId().equals(carId));
+                if (isInLocal) {
+                    return localStock;
+                }
+            }
+        }
+        
+        throw new IllegalArgumentException("Car not found in any stock");
+    }
+
+    @Transactional
+    public StockMovementDto reserveCarForSale(UUID carId, UUID centralStockId, UUID localStockId) {
+        Stock centralStock = stockRepo.findById(centralStockId)
+                .orElseThrow(() -> new IllegalArgumentException("Central stock not found"));
+        Stock localStock = stockRepo.findById(localStockId)
+                .orElseThrow(() -> new IllegalArgumentException("Local stock not found"));
+        
+        if (centralStock.getType() != StockType.CENTRAL) {
+            throw new IllegalArgumentException("Origin must be central stock");
+        }
+        if (localStock.getType() != StockType.LOCAL) {
+            throw new IllegalArgumentException("Destination must be local stock");
+        }
+
+        // Crear movimiento de transferencia programada
+        StockMovement mov = movRepo.save(
+            StockMovement.builder()
+                .moveId(UUID.randomUUID())
+                .dateTime(Instant.now())
+                .reason(MovementReason.TRANSFER)
+                .carId(carId)
+                .origin(centralStock)
+                .destination(localStock)
+                .build()
+        );
+
+        // Actualizar ubicación del auto
+        carClient.updateLocation(carId, localStockId);
+
+        return StockMovementDto.from(mov);
+    }
+
+    // 🛡️ MÉTODOS DE FALLBACK PARA CIRCUIT BREAKERS
+    public List<CarSummaryDto> getAllCarsFallback(Exception e) {
+        log.error("Fallback: Error getting all cars - {}", e.getMessage());
+        throw new IllegalStateException("Car service unavailable - " + e.getMessage());
+    }
+
+    public List<CarSummaryDto> findByStockFallback(UUID stockId, Exception e) {
+        log.error("Fallback: Error getting cars by stock {} - {}", stockId, e.getMessage());
+        throw new IllegalStateException("Car service unavailable - " + e.getMessage());
+    }
 }
